@@ -1,0 +1,3 @@
+Start server : symfony server:start
+    -> You can access the server on http://localhost:8000
+    -> Then, check the #[Route... of your API
