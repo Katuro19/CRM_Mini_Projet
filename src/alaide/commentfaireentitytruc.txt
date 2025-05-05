@@ -1,0 +1,47 @@
+Symfony - Guide rapide pour les entités et Doctrine
+
+1. Créer une nouvelle entité
+-----------------------------
+Commande :
+    php bin/console make:entity
+
+- Donne un nom à ton entité (ex: User)
+- Ajoute les champs (name, email, etc.)
+
+Symfony génère un fichier dans src/Entity/
+
+2. Générer une migration
+------------------------
+Commande :
+    php bin/console make:migration
+
+- Cette commande crée un fichier SQL dans le dossier migrations/
+- Il contient les changements à appliquer à la base de données
+
+3. Appliquer la migration à la base de données
+----------------------------------------------
+Commande :
+    php bin/console doctrine:migrations:migrate
+
+- Applique les changements à ta base PostgreSQL
+
+4. Ajouter d'autres entités plus tard
+-------------------------------------
+Tu peux relancer `make:entity` autant de fois que tu veux pour créer d'autres tables.
+Ensuite, refais :
+    php bin/console make:migration
+    php bin/console doctrine:migrations:migrate
+
+5. Relations entre entités (bonus)
+----------------------------------
+Tu peux créer des relations :
+    - OneToMany, ManyToOne, ManyToMany, etc.
+Exemple : Un User peut avoir plusieurs Articles
+
+6. Vérifier le schéma de ta base
+--------------------------------
+Commande :
+    php bin/console doctrine:schema:validate
+
+- Vérifie que tes entités et ta base sont bien synchronisées
+

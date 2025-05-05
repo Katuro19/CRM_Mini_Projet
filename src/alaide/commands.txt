@@ -1,0 +1,636 @@
+Start server : symfony server:start
+    -> You can access the server on http://localhost:8000
+    -> Then, check the #[Route... of your API
+
+
+
+# TP1 : Installation de Symfony et création d'un premier endpoint API
+
+## Objectifs
+- Installer l'environnement Symfony
+- Créer un projet API avec Symfony
+- Comprendre les concepts fondamentaux de Symfony
+- Créer un premier endpoint API fonctionnel
+
+## Prérequis
+- PHP 8.1 ou supérieur
+- Composer
+- Terminal (Linux/Mac) ou PowerShell (Windows)
+
+## 1. Installation de Symfony CLI
+
+La CLI (Command Line Interface) de Symfony est un outil qui facilite la création et la gestion de projets Symfony.
+
+### Pour Linux/Mac
+```bash
+curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | sudo -E bash && sudo apt install symfony-cli
+```
+
+
+### Vérification de l'installation
+```bash
+symfony -v
+```
+
+## 2. Création d'un nouveau projet Symfony pour API
+
+```bash
+symfony new my_api_project
+```
+
+Cette commande crée un nouveau projet Symfony, avec le minimum pour faire une API.
+
+### Structure du projet
+
+Après la création, votre projet contiendra plusieurs dossiers importants :
+- `src/` : contient tout le code PHP de votre application
+- `config/` : contient les fichiers de configuration
+- `public/` : le point d'entrée de l'application (index.php)
+- `templates/` : contient les templates Twig (pour les vues) (pas utilisé ici)
+- `var/` : contient les fichiers générés (cache, logs)
+- `vendor/` : contient les dépendances externes
+
+## 3. Notions fondamentales de Symfony
+
+### Controller
+Les controllers sont des classes PHP qui traitent les requêtes HTTP et retournent des réponses. Dans une API, ils sont responsables du traitement des endpoints.
+
+### Routing
+Le routing associe des URLs à des fonctions dans les controllers. En Symfony, le routing peut être défini via des attributs PHP directement dans les controllers.
+
+### Entity
+Les entités sont des classes PHP qui représentent des données. Elles sont généralement liées à des tables dans la base de données via Doctrine ORM.
+
+### Doctrine
+C'est l'ORM (Object-Relational Mapping) utilisé par Symfony pour interagir avec la base de données.
+
+### Services
+Les services sont des objets qui effectuent des opérations spécifiques (envoi d'emails, traitement de données, etc.).
+
+## 4. Création d'un premier endpoint "Hello World"
+
+### Générer un controller
+```bash
+symfony console make:controller HelloWorldController
+```
+
+Cette commande crée un nouveau controller avec une méthode et une route par défaut.
+
+### Modifier le controller pour en faire un endpoint API
+
+Ouvrez le fichier `src/Controller/HelloWorldController.php` et modifiez-le comme suit :
+
+```php
+<?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Routing\Annotation\Route;
+
+class HelloWorldController extends AbstractController
+{
+    #[Route('/api/hello', name: 'app_hello_world', methods: ['GET'])]
+    public function index(): JsonResponse
+    {
+        return $this->json([
+            'message' => 'Hello World!',
+            'timestamp' => new \DateTime()
+        ]);
+    }
+}
+```
+
+## 5. Lancer le serveur de développement
+
+```bash
+symfony server:start
+```
+
+Cette commande démarre un serveur de développement local. Par défaut, votre application sera accessible à l'adresse `http://localhost:8000`.
+
+Pour accéder à votre endpoint API, visitez : `http://localhost:8000/api/hello`
+
+
+### Test de l'API avec Postman
+
+[Postman](https://www.postman.com/downloads/) est un outil qui permet de tester facilement des APIs.
+
+1. Installez Postman
+2. Créez une nouvelle requête GET vers `http://localhost:8000/api/hello`
+3. Vérifiez que la réponse est bien un JSON contenant le message "Hello World!"
+
+### Exercices pratiques
+
+1. Modifier l'endpoint `/api/hello` pour qu'il accepte un paramètre `name` et retourne "Hello {name}!"
+2. Créer un nouvel endpoint qui retourne la date et l'heure actuelles
+
+## 6. Configuration de la base de données
+
+Symfony peut fonctionner avec différents systèmes de gestion de base de données. Pour ce TP, nous allons utiliser MySQL ou PostgreSQL.
+
+### Installation de la base de données
+
+#### Option 1: MySQL
+
+Démarrer le service :
+```bash
+# Pour Debian/Ubuntu
+sudo service mysql start
+
+# Pour macOS
+brew services start mysql
+```
+
+#### Option 2: PostgreSQL
+
+Installation (si non installé) :
+```bash
+# Pour Debian/Ubuntu
+sudo apt install postgresql postgresql-contrib
+
+# Pour macOS
+brew install postgresql
+```
+
+Démarrer le service :
+```bash
+# Pour Debian/Ubuntu
+sudo service postgresql start
+
+# Pour macOS
+brew services start postgresql
+```
+
+### Configuration de la connexion
+
+Configurez la connexion à la base de données dans le fichier `.env` selon votre choix:
+
+Pour MySQL:
+```
+DATABASE_URL="mysql://user:password@127.0.0.1:3306/my_database?serverVersion=8.0"
+```
+
+Pour PostgreSQL:
+```
+DATABASE_URL="postgresql://user:password@127.0.0.1:5432/my_database?serverVersion=15&charset=utf8"
+```
+
+Remplacez `user`, `password` et `my_database` par vos informations de connexion.
+
+### Création de la base de données
+
+```bash
+symfony console doctrine:database:create
+```
+
+### Création des tables
+
+Créez les tables à partir des entités :
+```bash
+symfony console make:migration
+symfony console doctrine:migrations:migrate
+```
+
+
+## 7. Création d'une entité
+
+Les entités représentent les données que votre API va manipuler.
+
+```bash
+symfony console make:entity
+```
+
+###  Exercice pratique : Modélisation des entitésdu CRM
+
+Pour mettre en pratique la création d'entités, vous allez créer l'ensemble des entités nécessaires pour un CRM de recrutement, basé sur les spécifications suivantes :
+
+#### Les entités à créer
+
+1. **Recruiter** (Recruteur)
+   - `id` (UUID)
+   - `firstName` (string, 255)
+   - `lastName` (string, 255)
+   - `company` (string, 255)
+   - `linkedinProfile` (string, 255)
+   - `email` (string, 255)
+   - `phone` (string, 50, nullable)
+   - `status` (string, 50) - Valeurs possibles : "Nouveau", "En discussion", "En cours de process", "Terminé"
+   - `notes` (text, nullable)
+   - `createdAt` (datetime)
+   - `updatedAt` (datetime)
+
+2. **Opportunity** (Opportunité)
+   - `id` (UUID)
+   - `jobTitle` (string, 255)
+   - `company` (string, 255)
+   - `contractType` (string, 100)
+   - `location` (string, 255)
+   - `salaryMin` (float, nullable)
+   - `salaryMax` (float, nullable)
+   - `salaryCurrency` (string, 10, nullable)
+   - `status` (string, 50) - Valeurs possibles : "Nouveau", "En discussion", "Entretien planifié", "Proposition reçue", "Refusé", "Accepté"
+   - `createdAt` (datetime)
+   - `updatedAt` (datetime)
+   - Relation avec Recruiter (ManyToOne)
+
+3. **Interaction** (Interaction)
+   - `id` (UUID)
+   - `type` (string, 100) - Valeurs possibles : "Email", "Appel", "Entretien", etc.
+   - `date` (datetime)
+   - `notes` (text, nullable)
+   - `nextSteps` (text, nullable)
+   - `createdAt` (datetime)
+   - Relation avec Recruiter (ManyToOne)
+   - Relation avec Opportunity (ManyToOne)
+
+#### Relations entre les entités
+
+- Un **Recruiter** peut proposer plusieurs **Opportunity**
+- Une **Opportunity** est proposée par un seul **Recruiter**
+- Un **Recruiter** peut avoir plusieurs **Interaction**
+- Une **Interaction** concerne un seul **Recruiter**
+- Une **Opportunity** peut avoir plusieurs **Interaction**
+- Une **Interaction** peut être liée à une seule **Opportunity**
+
+#### Instructions
+
+1. Créez les entités avec la commande `symfony console make:entity`
+2. Configurez les relations entre les entités
+3. Créez et exécutez les migrations pour mettre à jour la base de données
+4. Créez un jeu de données de test
+
+#### Aide pour les relations
+
+Pour créer une relation ManyToOne dans Symfony :
+
+1. Lors de la création de l'entité, ajoutez un champ pour la relation
+2. Choisissez le type de relation (ManyToOne, OneToMany, etc.)
+3. Indiquez l'entité cible de la relation
+4. Décidez si la relation peut être null (nullable)
+5. Choisissez si vous voulez que Doctrine crée la relation inverse
+
+#### Validation
+
+Vérifiez que vos entités sont correctement créées et que les relations fonctionnent en :
+1. Consultant le schéma de base de données généré
+2. Créant quelques enregistrements de test via le code ou directement dans la base de données
+
+
+## 8. Créer un CRUD API pour les entités du CRM
+
+Maintenant que vous avez créé les entités pour le CRM de recrutement, nous allons implémenter les opérations CRUD (Create, Read, Update, Delete) pour chacune d'entre elles.
+
+### 8.1 Création des controllers
+
+Créez un controller pour chaque entité :
+
+```bash
+# Création du controller pour les Recruteurs
+symfony console make:controller RecruiterController
+
+# Création du controller pour les Opportunités
+symfony console make:controller OpportunityController
+
+# Création du controller pour les Interactions
+symfony console make:controller InteractionController
+```
+
+### 8.2 Implémentation du CRUD pour les Recruteurs
+
+Ouvrez le fichier `src/Controller/RecruiterController.php` et modifiez-le pour implémenter les opérations CRUD :
+
+```php
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Recruiter;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/recruiters')]
+class RecruiterController extends AbstractController
+{
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    // Liste tous les recruteurs
+    #[Route('', name: 'app_recruiter_index', methods: ['GET'])]
+    public function index(): JsonResponse
+    {
+        $recruiters = $this->entityManager->getRepository(Recruiter::class)->findAll();
+        
+        $data = [];
+        foreach ($recruiters as $recruiter) {
+            $data[] = [
+                'id' => $recruiter->getId(),
+                'firstName' => $recruiter->getFirstName(),
+                'lastName' => $recruiter->getLastName(),
+                'company' => $recruiter->getCompany(),
+                'email' => $recruiter->getEmail(),
+                'linkedinProfile' => $recruiter->getLinkedinProfile(),
+                'phone' => $recruiter->getPhone(),
+                'status' => $recruiter->getStatus(),
+                'notes' => $recruiter->getNotes(),
+                'createdAt' => $recruiter->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $recruiter->getUpdatedAt()->format('Y-m-d H:i:s')
+            ];
+        }
+        
+        return new JsonResponse($data);
+    }
+
+    // Récupère un recruteur par son ID
+    #[Route('/{id}', name: 'app_recruiter_show', methods: ['GET'])]
+    public function show(Recruiter $recruiter): JsonResponse
+    {
+        $data = [
+            'id' => $recruiter->getId(),
+            'firstName' => $recruiter->getFirstName(),
+            'lastName' => $recruiter->getLastName(),
+            'company' => $recruiter->getCompany(),
+            'email' => $recruiter->getEmail(),
+            'linkedinProfile' => $recruiter->getLinkedinProfile(),
+            'phone' => $recruiter->getPhone(),
+            'status' => $recruiter->getStatus(),
+            'notes' => $recruiter->getNotes(),
+            'createdAt' => $recruiter->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $recruiter->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
+        
+        return new JsonResponse($data);
+    }
+
+    // Crée un nouveau recruteur
+    #[Route('', name: 'app_recruiter_create', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        $recruiter = new Recruiter();
+        $recruiter->setFirstName($data['firstName']);
+        $recruiter->setLastName($data['lastName']);
+        $recruiter->setCompany($data['company']);
+        $recruiter->setLinkedinProfile($data['linkedinProfile']);
+        $recruiter->setEmail($data['email']);
+        $recruiter->setPhone($data['phone'] ?? null);
+        $recruiter->setStatus($data['status']);
+        $recruiter->setNotes($data['notes'] ?? null);
+        $recruiter->setCreatedAt(new \DateTime());
+        $recruiter->setUpdatedAt(new \DateTime());
+        
+        $this->entityManager->persist($recruiter);
+        $this->entityManager->flush();
+        
+        $responseData = [
+            'id' => $recruiter->getId(),
+            'firstName' => $recruiter->getFirstName(),
+            'lastName' => $recruiter->getLastName(),
+            'company' => $recruiter->getCompany(),
+            'email' => $recruiter->getEmail(),
+            'linkedinProfile' => $recruiter->getLinkedinProfile(),
+            'phone' => $recruiter->getPhone(),
+            'status' => $recruiter->getStatus(),
+            'notes' => $recruiter->getNotes(),
+            'createdAt' => $recruiter->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $recruiter->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
+        
+        return new JsonResponse($responseData, Response::HTTP_CREATED);
+    }
+
+    // Met à jour un recruteur existant
+    #[Route('/{id}', name: 'app_recruiter_update', methods: ['PUT'])]
+    public function update(Request $request, Recruiter $recruiter): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        if (isset($data['firstName'])) {
+            $recruiter->setFirstName($data['firstName']);
+        }
+        if (isset($data['lastName'])) {
+            $recruiter->setLastName($data['lastName']);
+        }
+        if (isset($data['company'])) {
+            $recruiter->setCompany($data['company']);
+        }
+        if (isset($data['linkedinProfile'])) {
+            $recruiter->setLinkedinProfile($data['linkedinProfile']);
+        }
+        if (isset($data['email'])) {
+            $recruiter->setEmail($data['email']);
+        }
+        if (isset($data['phone'])) {
+            $recruiter->setPhone($data['phone']);
+        }
+        if (isset($data['status'])) {
+            $recruiter->setStatus($data['status']);
+        }
+        if (isset($data['notes'])) {
+            $recruiter->setNotes($data['notes']);
+        }
+        
+        $recruiter->setUpdatedAt(new \DateTime());
+        
+        $this->entityManager->flush();
+        
+        $responseData = [
+            'id' => $recruiter->getId(),
+            'firstName' => $recruiter->getFirstName(),
+            'lastName' => $recruiter->getLastName(),
+            'company' => $recruiter->getCompany(),
+            'email' => $recruiter->getEmail(),
+            'linkedinProfile' => $recruiter->getLinkedinProfile(),
+            'phone' => $recruiter->getPhone(),
+            'status' => $recruiter->getStatus(),
+            'notes' => $recruiter->getNotes(),
+            'createdAt' => $recruiter->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $recruiter->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
+        
+        return new JsonResponse($responseData);
+    }
+
+    // Supprime un recruteur
+    #[Route('/{id}', name: 'app_recruiter_delete', methods: ['DELETE'])]
+    public function delete(Recruiter $recruiter): JsonResponse
+    {
+        $this->entityManager->remove($recruiter);
+        $this->entityManager->flush();
+        
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
+    }
+}
+```
+
+### 8.3 Exemple simplifié pour l'entité Opportunity
+
+Créez un controller similaire pour l'entité Opportunity :
+
+```php
+<?php
+
+namespace App\Controller;
+
+use App\Entity\Opportunity;
+use App\Entity\Recruiter;
+use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Annotation\Route;
+
+#[Route('/api/opportunities')]
+class OpportunityController extends AbstractController
+{
+    private $entityManager;
+
+    public function __construct(EntityManagerInterface $entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    // Liste toutes les opportunités
+    #[Route('', name: 'app_opportunity_index', methods: ['GET'])]
+    public function index(): JsonResponse
+    {
+        $opportunities = $this->entityManager->getRepository(Opportunity::class)->findAll();
+        
+        $data = [];
+        foreach ($opportunities as $opportunity) {
+            $data[] = [
+                'id' => $opportunity->getId(),
+                'jobTitle' => $opportunity->getJobTitle(),
+                'company' => $opportunity->getCompany(),
+                'contractType' => $opportunity->getContractType(),
+                'location' => $opportunity->getLocation(),
+                'salaryMin' => $opportunity->getSalaryMin(),
+                'salaryMax' => $opportunity->getSalaryMax(),
+                'salaryCurrency' => $opportunity->getSalaryCurrency(),
+                'status' => $opportunity->getStatus(),
+                'recruiter' => [
+                    'id' => $opportunity->getRecruiter()->getId(),
+                    'firstName' => $opportunity->getRecruiter()->getFirstName(),
+                    'lastName' => $opportunity->getRecruiter()->getLastName()
+                ],
+                'createdAt' => $opportunity->getCreatedAt()->format('Y-m-d H:i:s'),
+                'updatedAt' => $opportunity->getUpdatedAt()->format('Y-m-d H:i:s')
+            ];
+        }
+        
+        return new JsonResponse($data);
+    }
+
+    // Crée une nouvelle opportunité
+    #[Route('', name: 'app_opportunity_create', methods: ['POST'])]
+    public function create(Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        
+        $recruiter = $this->entityManager->getRepository(Recruiter::class)->find($data['recruiterId']);
+        
+        if (!$recruiter) {
+            return new JsonResponse(['error' => 'Recruiter not found'], Response::HTTP_NOT_FOUND);
+        }
+        
+        $opportunity = new Opportunity();
+        $opportunity->setJobTitle($data['jobTitle']);
+        $opportunity->setCompany($data['company']);
+        $opportunity->setContractType($data['contractType']);
+        $opportunity->setLocation($data['location']);
+        $opportunity->setSalaryMin($data['salaryMin'] ?? null);
+        $opportunity->setSalaryMax($data['salaryMax'] ?? null);
+        $opportunity->setSalaryCurrency($data['salaryCurrency'] ?? null);
+        $opportunity->setStatus($data['status']);
+        $opportunity->setRecruiter($recruiter);
+        $opportunity->setCreatedAt(new \DateTime());
+        $opportunity->setUpdatedAt(new \DateTime());
+        
+        $this->entityManager->persist($opportunity);
+        $this->entityManager->flush();
+        
+        $responseData = [
+            'id' => $opportunity->getId(),
+            'jobTitle' => $opportunity->getJobTitle(),
+            'company' => $opportunity->getCompany(),
+            'contractType' => $opportunity->getContractType(),
+            'location' => $opportunity->getLocation(),
+            'salaryMin' => $opportunity->getSalaryMin(),
+            'salaryMax' => $opportunity->getSalaryMax(),
+            'salaryCurrency' => $opportunity->getSalaryCurrency(),
+            'status' => $opportunity->getStatus(),
+            'recruiter' => [
+                'id' => $recruiter->getId(),
+                'firstName' => $recruiter->getFirstName(),
+                'lastName' => $recruiter->getLastName()
+            ],
+            'createdAt' => $opportunity->getCreatedAt()->format('Y-m-d H:i:s'),
+            'updatedAt' => $opportunity->getUpdatedAt()->format('Y-m-d H:i:s')
+        ];
+        
+        return new JsonResponse($responseData, Response::HTTP_CREATED);
+    }
+
+    // Autres méthodes (show, update, delete) à implémenter de façon similaire
+}
+```
+
+### 8.4 Test des endpoints
+
+Utilisez Postman pour tester vos endpoints CRUD :
+
+1. **GET** `/api/recruiters` - Liste tous les recruteurs
+2. **GET** `/api/recruiters/{id}` - Récupère un recruteur spécifique
+3. **POST** `/api/recruiters` - Crée un nouveau recruteur
+4. **PUT** `/api/recruiters/{id}` - Met à jour un recruteur
+5. **DELETE** `/api/recruiters/{id}` - Supprime un recruteur
+
+Faites de même pour les endpoints des opportunités (`/api/opportunities`) et des interactions (`/api/interactions`).
+
+### 8.5 Gestion des erreurs
+
+Pour améliorer la robustesse de votre API, ajoutez une gestion des erreurs basique :
+
+```php
+// Dans la méthode create du RecruiterController
+#[Route('', name: 'app_recruiter_create', methods: ['POST'])]
+public function create(Request $request): JsonResponse
+{
+    try {
+        $data = json_decode($request->getContent(), true);
+        
+        // Vérification des champs obligatoires
+        if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['email'])) {
+            return new JsonResponse(['error' => 'Missing required fields'], Response::HTTP_BAD_REQUEST);
+        }
+        
+        $recruiter = new Recruiter();
+        // ... configuration du recruteur
+        
+        $this->entityManager->persist($recruiter);
+        $this->entityManager->flush();
+        
+        // ... création de la réponse
+        
+        return new JsonResponse($responseData, Response::HTTP_CREATED);
+    } catch (\Exception $e) {
+        return new JsonResponse(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+}
+```
+
+## Pour aller plus loin
+
+- Documentation officielle de Symfony : [https://symfony.com/doc/current/index.html](https://symfony.com/doc/current/index.html)
+- API Platform (framework API pour Symfony) : [https://api-platform.com/](https://api-platform.com/)
