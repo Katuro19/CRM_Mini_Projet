@@ -52,7 +52,6 @@ class RecruiterController extends AbstractController
     #[Route('/{id}', name: 'app_recruiter_show', methods: ['GET'])]
     public function show(Recruiter $recruiter): JsonResponse
     {
-
         $data = [
             'id' => $recruiter->getId(),
             'firstName' => $recruiter->getFirstName(),
@@ -74,20 +73,22 @@ class RecruiterController extends AbstractController
     #[Route('', name: 'app_recruiter_create', methods: ['POST'])]
     public function create(Request $request): JsonResponse
     {
-
-        if (!$this->checkKey($request)) {
-            return new JsonResponse(['error' => 'Unauthorized'], 401);
-        }
-
         try {
-            $data = json_decode($request->getContent(), true);
-            // Vérification des champs obligatoires
-            if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['email'])) {
-                return new JsonResponse(['error' => 'Missing required fields'], Response::HTTP_BAD_REQUEST);
+            // Vérification de la clé API
+            if (!$this->checkKey($request)) {
+                throw new \Exception('Unauthorized', 401);  // Lancer une exception pour "Unauthorized"
             }
 
+            // Récupérer les données du body en JSON
+            $data = json_decode($request->getContent(), true);
+
+            // Vérification des champs obligatoires
+            if (!isset($data['firstName']) || !isset($data['lastName']) || !isset($data['email'])) {
+                throw new \Exception('Missing required fields', 400);  // Lancer une exception pour "Missing required fields"
+            }
+
+            // Création de l'entité Recruiter
             $recruiter = new Recruiter();
-            // ... configuration du recruteur
             $recruiter->setFirstName($data['firstName']);
             $recruiter->setLastName($data['lastName']);
             $recruiter->setCompany($data['company']);
@@ -99,10 +100,11 @@ class RecruiterController extends AbstractController
             $recruiter->setCreatedAt(new \DateTimeImmutable());
             $recruiter->setUpdatedAt(new \DateTimeImmutable());
 
-
+            // Sauvegarde de l'entité dans la base de données
             $this->entityManager->persist($recruiter);
             $this->entityManager->flush();
 
+            // Construction de la réponse
             $responseData = [
                 'id' => $recruiter->getId(),
                 'firstName' => $recruiter->getFirstName(),
@@ -117,11 +119,11 @@ class RecruiterController extends AbstractController
                 'updatedAt' => $recruiter->getUpdatedAt()->format('Y-m-d H:i:s')
             ];
 
-            // ... création de la réponse
-            
+            // Retourne la réponse JSON avec le statut "Created"
             return new JsonResponse($responseData, Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'An error occurred: ' . $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
+            // Si une exception est lancée, on capture et retourne la réponse JSON avec le message d'erreur et le code HTTP
+            return new JsonResponse(['error' => $e->getMessage()], $e->getCode());
         }
     }
 
