@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\RecruiterRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: RecruiterRepository::class)]
@@ -36,6 +38,30 @@ class Recruiter
 
     #[ORM\Column(length: 255)]
     private ?string $notes = null;
+
+    /**
+     * @var Collection<int, Opportunity>
+     */
+    #[ORM\OneToMany(targetEntity: Opportunity::class, mappedBy: 'recruiter')]
+    private Collection $opportunities;
+
+    /**
+     * @var Collection<int, Interaction>
+     */
+    #[ORM\OneToMany(targetEntity: Interaction::class, mappedBy: 'recruiter')]
+    private Collection $opportunity;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $createdAt = null;
+
+    #[ORM\Column]
+    private ?\DateTimeImmutable $updatedAt = null;
+
+    public function __construct()
+    {
+        $this->opportunities = new ArrayCollection();
+        $this->opportunity = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -141,6 +167,68 @@ class Recruiter
     public function setNotes(string $notes): static
     {
         $this->notes = $notes;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Opportunity>
+     */
+    public function getOpportunities(): Collection
+    {
+        return $this->opportunities;
+    }
+
+    public function addOpportunity(Opportunity $opportunity): static
+    {
+        if (!$this->opportunities->contains($opportunity)) {
+            $this->opportunities->add($opportunity);
+            $opportunity->setRecruiter($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOpportunity(Opportunity $opportunity): static
+    {
+        if ($this->opportunities->removeElement($opportunity)) {
+            // set the owning side to null (unless already changed)
+            if ($opportunity->getRecruiter() === $this) {
+                $opportunity->setRecruiter(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Interaction>
+     */
+    public function getOpportunity(): Collection
+    {
+        return $this->opportunity;
+    }
+
+    public function getCreatedAt(): ?\DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?\DateTimeImmutable
+    {
+        return $this->updatedAt;
+    }
+
+    public function setUpdatedAt(\DateTimeImmutable $updatedAt): static
+    {
+        $this->updatedAt = $updatedAt;
 
         return $this;
     }

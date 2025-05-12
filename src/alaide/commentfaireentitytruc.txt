@@ -1,47 +1,61 @@
-Symfony - Guide rapide pour les entités et Doctrine
+📁 SYMFONY / DOCTRINE - PENSE-BÊTE
 
-1. Créer une nouvelle entité
------------------------------
-Commande :
-    php bin/console make:entity
+1. 🚀 Créer une entité
+----------------------
+php bin/console make:entity NomDeLEntité
 
-- Donne un nom à ton entité (ex: User)
-- Ajoute les champs (name, email, etc.)
+> Pour chaque champ :
+  - Nom du champ : ex: firstName
+  - Type du champ : string, text, datetime, boolean, etc.
+  - Longueur : (si applicable)
+  - Nullable ? yes/no
+  - Default ? (optionnel)
 
-Symfony génère un fichier dans src/Entity/
+✅ Tu peux relancer la commande pour modifier l'entité plus tard.
 
-2. Générer une migration
-------------------------
-Commande :
-    php bin/console make:migration
+2. 🔁 Ajouter une relation (ex: ManyToOne avec Recruiter)
+----------------------------------------------------------
+php bin/console make:entity Opportunity
 
-- Cette commande crée un fichier SQL dans le dossier migrations/
-- Il contient les changements à appliquer à la base de données
+> Nom de la propriété : recruiter
+> Type de relation : 0 (ManyToOne)
+> Classe liée : App\Entity\Recruiter
+> Inverse side (optionnel)
+> Nullable ? yes/no
 
-3. Appliquer la migration à la base de données
-----------------------------------------------
-Commande :
-    php bin/console doctrine:migrations:migrate
+➡️ Doctrine va générer une relation avec jointure SQL automatiquement.
 
-- Applique les changements à ta base PostgreSQL
+3. 📥 Générer une migration
+---------------------------
+php bin/console make:migration
 
-4. Ajouter d'autres entités plus tard
+4. ⬆️ Exécuter la migration
+---------------------------
+php bin/console doctrine:migrations:migrate
+
+⚠️ Attention : La migration crée les tables ou modifie la structure selon tes entités.
+
+5. 🗑️ Supprimer une entité ou une propriété
+-------------------------------------------
+- Supprime manuellement le fichier dans `src/Entity/`
+- Supprime les anciennes migrations si besoin
+- Refaire `make:migration` pour synchroniser
+- Exécuter `migrate` à nouveau
+
+6. 🧼 Annuler une commande make:entity en cours ?
+-------------------------------------------------
+❌ Tu peux quitter avec `Ctrl+C` pendant la saisie.
+✅ Sinon, supprime les mauvaises propriétés à la main dans le fichier.
+
+7. ✅ Tester une entité en contrôleur
 -------------------------------------
-Tu peux relancer `make:entity` autant de fois que tu veux pour créer d'autres tables.
-Ensuite, refais :
-    php bin/console make:migration
-    php bin/console doctrine:migrations:migrate
+Dans un contrôleur :
 
-5. Relations entre entités (bonus)
-----------------------------------
-Tu peux créer des relations :
-    - OneToMany, ManyToOne, ManyToMany, etc.
-Exemple : Un User peut avoir plusieurs Articles
+```php
+public function test(EntityManagerInterface $em): Response
+{
+    $repo = $em->getRepository(Opportunity::class);
+    $all = $repo->findAll();
 
-6. Vérifier le schéma de ta base
---------------------------------
-Commande :
-    php bin/console doctrine:schema:validate
-
-- Vérifie que tes entités et ta base sont bien synchronisées
-
+    return $this->json($all);
+}

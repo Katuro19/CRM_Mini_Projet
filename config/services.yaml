@@ -8,6 +8,8 @@ parameters:
     dbname: '%env(dbname)'
     username: '%env(postgres)'
     password: '%env(password)'
+    api_key: '%env(API_KEY)%'
+
 
 services:
     # default configuration for services in *this* file

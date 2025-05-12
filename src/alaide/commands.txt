@@ -271,7 +271,7 @@ Pour créer une relation ManyToOne dans Symfony :
 4. Décidez si la relation peut être null (nullable)
 5. Choisissez si vous voulez que Doctrine crée la relation inverse
 
-#### Validation
+#### Validation 
 
 Vérifiez que vos entités sont correctement créées et que les relations fonctionnent en :
 1. Consultant le schéma de base de données généré
