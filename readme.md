@@ -11,3 +11,5 @@ symfony server:start
 
 ## Documentation API
 Accès au Swagger : http://localhost:8000/swagger
+
+Accès a la page : http://localhost:8000/
